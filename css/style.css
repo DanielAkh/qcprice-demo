@@ -1,0 +1,1243 @@
+/* ==========================================================================
+   Qazcontent — «Реклама. Прайс на 2026 год»
+   Всё изолировано внутри .qc-price. Правила компонентов начинаются с
+   .qc-price, чтобы перебивать стили темы WordPress (.entry-content td и т.п.).
+   Цвета — из PDF (design/price_new.pdf), не из JPG.
+   ========================================================================== */
+
+/* ---------- 0. Шрифт (локально, assets/fonts) ---------- */
+/* Mulish v18 с Google Fonts, лицензия OFL (assets/fonts/OFL.txt). Шрифт
+   вариативный: Regular и Bold — один файл (ось wght 200–1000), Italic — отдельный.
+   Только кириллица и латиница; unicode-range — как у Google. Семейство названо
+   qc-mulish, чтобы не смешаться с Mulish, если его подключит тема WP. */
+@font-face {
+  font-family: "qc-mulish";
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url("../assets/fonts/mulish-cyrillic.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: "qc-mulish";
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url("../assets/fonts/mulish-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "qc-mulish";
+  font-style: italic;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url("../assets/fonts/mulish-italic-cyrillic.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: "qc-mulish";
+  font-style: italic;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url("../assets/fonts/mulish-italic-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ---------- 1. Токены ---------- */
+.qc-price {
+  /* Шрифт. Заменить на Proxima Nova, когда будут woff2 (@font-face выше). */
+  --qc-font: "qc-mulish", sans-serif;
+
+  /* Цвета (PDF) */
+  --qc-blue: #019BFA;          /* кнопки, синяя шапка, иконки */
+  --qc-navy: #022B5C;          /* плашка «Доп. опции», тёмные стрелки, заголовки */
+  --qc-blue-light: #ECF4FD;    /* светло-голубая шапка, бейдж */
+  --qc-border: #E9F4FC;        /* линии таблиц и карточек */
+  --qc-border-w: 2px;          /* толщина линий таблиц (замер по рендеру PDF) */
+  --qc-text: #221F20;          /* K100 → RGB */
+  --qc-white: #FFFFFF;
+  --qc-purple: #A54686;        /* CMYK 20/80/0/20 */
+  --qc-red: #ED1B23;           /* CMYK 0/100/100/0 */
+  --qc-orange: #F6821F;        /* CMYK 0/60/100/0 */
+
+  /* Градиент примечаний (PDF: axial shading, C0 → C1) */
+  --qc-note-from: #053B67;
+  --qc-note-to: #237FB0;
+
+  /* Оверлей hero (PDF: navy-заливка с радиальной маской) */
+  --qc-hero-overlay: #022F5B;
+  --qc-hero-overlay-rgb: 2, 47, 91;
+
+  /* Типографика (вариант B) */
+  --qc-fs-cell: 18px;
+  --qc-fs-head: 20px;
+  --qc-fs-btn: 16px;
+  --qc-lh: 1.2;
+
+  /* Радиусы (замер по design/ref/page-1.png) */
+  --qc-radius-table: 13px;
+  --qc-radius-bar: 10px;
+  --qc-radius-card: 5px;
+  --qc-radius-badge: 5px;
+  --qc-radius-btn: 3px;
+
+  /* Отступы */
+  --qc-container: 1270px;
+  --qc-gutter: 15px;
+  --qc-cell-py: 12px;
+  --qc-cell-px: 22px;
+  --qc-btn-h: 45px;            /* кнопки в секциях; в hero — 47px */
+  --qc-anchor-offset: 100px;   /* высота шапки сайта WP; уточнить, см. TODO.md */
+  /* Зазор между секциями: от низа предыдущей до верха шапки следующей. В макете
+     секция → секция 42 и 47px (ref/page-2, page-3); 19 и 60 — подгонка под страницу PDF */
+  --qc-section-gap: 44px;
+}
+
+/* ---------- 2. Сброс (только внутри .qc-price) ---------- */
+.qc-price,
+.qc-price *,
+.qc-price *::before,
+.qc-price *::after {
+  box-sizing: border-box;
+}
+
+.qc-price {
+  font-family: var(--qc-font);
+  font-size: var(--qc-fs-cell);
+  font-weight: 400;
+  line-height: var(--qc-lh);
+  color: var(--qc-text);
+  background: var(--qc-white); /* макет на белом; фон темы WP не просвечивает */
+  text-align: left;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Сброс элементов против стилей темы WP. Специфичность (0,1,4): «.qc-price» +
+   тег в :is() + три :not(qc-z) (несуществующий тег, каждый даёт +0,0,1). Так сброс
+   сильнее селекторов темы вида «td», «.entry-content p», «.entry-content table td»,
+   «tr:nth-child(even) td», «.entry-content ul li::before» (до 0,1,3) — и слабее
+   любого нашего компонента (.qc-price .qc-…, 0,2,0). Тему с (0,2,x) и выше не
+   перебить без !important — см. tools/theme-conflict-test.html. */
+.qc-price :is(section, nav, figure, figcaption, h2, h3, h4, h5, h6, p, ol, ul, li,
+  table, caption, thead, tbody, tr, th, td, a, img, svg, em, span):not(qc-z):not(qc-z):not(qc-z) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  letter-spacing: normal;
+  word-spacing: normal;
+  text-transform: none;
+  text-indent: 0;
+  text-align: inherit;
+  text-decoration: none;
+  text-shadow: none;
+  float: none;
+}
+
+.qc-price :is(ol, ul):not(qc-z):not(qc-z):not(qc-z) {
+  list-style: none;
+}
+
+/* Маркеры-«звёздочки» темы у пунктов списков; наши ::before (0,2,1) сильнее */
+.qc-price :is(li):not(qc-z):not(qc-z):not(qc-z)::before,
+.qc-price :is(li):not(qc-z):not(qc-z):not(qc-z)::after {
+  content: none;
+}
+
+/* Курсив — настоящий Mulish Italic (assets/fonts), тема не перекрасит и не сделает жирным */
+.qc-price :is(em):not(qc-z):not(qc-z):not(qc-z) {
+  font-style: italic;
+}
+
+.qc-price :is(img, svg):not(qc-z):not(qc-z):not(qc-z) {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  vertical-align: baseline;
+}
+
+.qc-price :is(table):not(qc-z):not(qc-z):not(qc-z) {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.qc-price :is(th, td):not(qc-z):not(qc-z):not(qc-z) {
+  vertical-align: top;
+  text-align: inherit;
+}
+
+/* ---------- 3. Сетка ---------- */
+.qc-price .qc-container {
+  max-width: var(--qc-container);
+  margin: 0 auto;
+  padding: 0 var(--qc-gutter);
+}
+
+/* Якоря навигации (#qc-baq, #qc-el, …) не прячутся под фиксированной шапкой сайта */
+.qc-price [id] {
+  scroll-margin-top: var(--qc-anchor-offset);
+}
+
+/* ---------- 4. Кнопка ---------- */
+.qc-price .qc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: var(--qc-btn-h);
+  padding: 0 16px;
+  border: 2px solid transparent;
+  border-radius: var(--qc-radius-btn);
+  font-family: var(--qc-font);
+  font-size: var(--qc-fs-btn);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.qc-price .qc-btn__icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+/* Горизонтальные отступы подобраны под ширину кнопок макета (234 и 207px)
+   при шрифте Mulish 16px: Mulish шире Proxima, поэтому поля уже, чем в макете. */
+.qc-price .qc-btn--primary {
+  padding: 0 6px;
+  background: var(--qc-blue);
+  border-color: var(--qc-blue);
+  color: var(--qc-white);
+}
+
+.qc-price .qc-btn--primary:hover,
+.qc-price .qc-btn--primary:focus-visible {
+  background: #0088DD;
+  border-color: #0088DD;
+  color: var(--qc-white);
+}
+
+/* Контурная белая — для тёмного фона hero */
+.qc-price .qc-btn--outline {
+  padding: 0 14px;
+  background: transparent;
+  border-color: var(--qc-white);
+  color: var(--qc-white);
+}
+
+.qc-price .qc-btn--outline:hover,
+.qc-price .qc-btn--outline:focus-visible {
+  background: var(--qc-white);
+  color: var(--qc-navy);
+}
+
+.qc-price .qc-btn:focus-visible {
+  outline: 2px solid var(--qc-blue);
+  outline-offset: 2px;
+}
+
+/* ---------- 5. Таблица ---------- */
+.qc-price .qc-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Узкая таблица по центру (опции EL, скидки) — 73% ширины контента */
+.qc-price .qc-table-wrap--narrow {
+  /* 906px из 1240: опции EL (ref/page-3), скидки — 904 (ref/page-4). Не уже min-width
+     таблицы (560px): иначе на 769–830px таблица скроллится в узкой коробке */
+  max-width: max(73%, 560px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.qc-price .qc-table {
+  /* цвет шапки задают модификаторы */
+  --qc-th-bg: var(--qc-blue-light);
+  --qc-th-color: var(--qc-text);
+  --qc-th-weight: 400;
+  /* Шапка по бокам перекрывает рамку таблицы (синяя, светлая) — или стоит внутри
+     неё (фиолетовая, красная, оранжевая: в design/ref/*@2x видна рамка 2px) */
+  --qc-th-overlap: var(--qc-border-w);
+  --qc-th-radius: var(--qc-radius-table);
+
+  width: 100%;
+  min-width: 720px;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: var(--qc-border-w) solid var(--qc-border);
+  border-radius: var(--qc-radius-table);
+  background: var(--qc-white);
+  font-size: var(--qc-fs-cell);
+  line-height: var(--qc-lh);
+  color: var(--qc-text);
+}
+
+.qc-price .qc-table-wrap--narrow .qc-table {
+  min-width: 560px;
+}
+
+/* Линии: каждая ячейка рисует левую и верхнюю границу,
+   внешнюю рамку даёт сама таблица. */
+.qc-price .qc-table__th,
+.qc-price .qc-table__cell {
+  padding: var(--qc-cell-py) var(--qc-cell-px);
+  border-top: var(--qc-border-w) solid var(--qc-border);
+  border-left: var(--qc-border-w) solid var(--qc-border);
+}
+
+/* Первая ячейка строки стоит у левого края — кроме строк-продолжений
+   под rowspan (у них первая ячейка внутренняя). */
+.qc-price .qc-table__row:not(.qc-table__row--sub) > :first-child {
+  border-left: 0;
+}
+
+/* Верхний ряд шапки прилегает к рамке таблицы */
+.qc-price .qc-table__head .qc-table__row:first-child > * {
+  border-top: 0;
+}
+
+/* Шапка */
+.qc-price .qc-table__th {
+  background: var(--qc-th-bg);
+  color: var(--qc-th-color);
+  font-size: var(--qc-fs-head);
+  font-weight: var(--qc-th-weight);
+  text-align: center;
+  vertical-align: middle;
+  height: 88px;
+  /* 3 строки «Стоимость / с учетом / НДС, тенге» при lh 1.2 укладываются в 88px */
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.qc-price .qc-table__th--left {
+  text-align: left;
+}
+
+/* Узкая колонка («Блок»): слово должно помещаться и при min-width 720px */
+.qc-price .qc-table__th--tight {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+/* «№» в макете жирный (в PDF — глиф Times New Roman Bold) */
+.qc-price .qc-table__th--num {
+  font-weight: 700;
+}
+
+/* Скругление шапки: радиус как у таблицы (13px), замер по design/ref/page-3@2x.png;
+   у шапок внутри рамки — 11px, концентрично её внутреннему краю */
+.qc-price .qc-table__head .qc-table__row:first-child > :first-child {
+  border-top-left-radius: var(--qc-th-radius);
+}
+
+.qc-price .qc-table__head .qc-table__row:first-child > :last-child {
+  border-top-right-radius: var(--qc-th-radius);
+}
+
+/* В макете шапка — плашка, скруглённая и снизу; по бокам перекрывает рамку
+   таблицы тенью цвета шапки на ширину рамки (--qc-th-overlap, 0 — не перекрывает).
+   Для двухъярусной шапки нижние углы — у последнего ряда. */
+.qc-price .qc-table__head .qc-table__row:last-child > :first-child {
+  border-bottom-left-radius: var(--qc-th-radius);
+}
+
+.qc-price .qc-table__head .qc-table__row:last-child > :last-child {
+  border-bottom-right-radius: var(--qc-th-radius);
+}
+
+.qc-price .qc-table__head .qc-table__row > :first-child {
+  box-shadow: calc(-1 * var(--qc-th-overlap)) 0 0 var(--qc-th-bg);
+}
+
+.qc-price .qc-table__head .qc-table__row > :last-child {
+  box-shadow: var(--qc-th-overlap) 0 0 var(--qc-th-bg);
+}
+
+/* Единственная ячейка ряда (colspan на всю ширину) — перекрытие с обеих сторон */
+.qc-price .qc-table__head .qc-table__row > :only-child {
+  box-shadow:
+    calc(-1 * var(--qc-th-overlap)) 0 0 var(--qc-th-bg),
+    var(--qc-th-overlap) 0 0 var(--qc-th-bg);
+}
+
+/* Ячейки тела */
+.qc-price .qc-table__cell {
+  vertical-align: top;
+}
+
+.qc-price .qc-table__cell--num {
+  font-weight: 700;
+}
+
+.qc-price .qc-table__cell--center {
+  text-align: center;
+}
+
+.qc-price .qc-table__cell--middle {
+  vertical-align: middle;
+}
+
+.qc-price .qc-table__cell--price {
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Размеры «290*1080 px» не переносятся (на узких экранах текст
+   может заходить в правое поле ячейки) */
+.qc-price .qc-table__cell--nowrap {
+  white-space: nowrap;
+}
+
+/* Итоговая строка в конце ячейки («Стоимость услуги: …» в пакетах):
+   отдельный абзац, отступ сверху — одна строка текста */
+.qc-price .qc-table__total {
+  margin-top: calc(var(--qc-lh) * 1em);
+}
+
+/* Неразрывный фрагмент внутри текста («E-HISTORY.KZ» не рвётся по дефису) */
+.qc-price .qc-nowrap {
+  white-space: nowrap;
+}
+
+/* Колонка «примечание» в таблицах услуг: в макете текст отступает на ~42px */
+.qc-price .qc-table__cell--indent {
+  padding-left: 42px;
+}
+
+/* Ячейка-продолжение предыдущей: без разделительной линии слева
+   (в опциях иконка и название — одна колонка макета) */
+.qc-price .qc-table__cell--joined {
+  border-left: 0;
+}
+
+/* Иконка в первой колонке таблицы опций: PNG до 120px вписан в коробку 30×24
+   по левому краю. max-width: none — сброс img (max-width: 100%) не сжимает
+   коробку в узкой колонке; SVG пока нет (см. TODO.md) */
+.qc-price .qc-table__icon {
+  display: block;
+  width: 30px;
+  height: 24px;
+  max-width: none;
+  object-fit: contain;
+  object-position: left center;
+}
+
+/* Модификаторы цвета шапки */
+.qc-price .qc-table--light {
+  --qc-th-bg: var(--qc-blue-light);
+  --qc-th-color: var(--qc-text);
+}
+
+.qc-price .qc-table--blue {
+  --qc-th-bg: var(--qc-blue);
+  --qc-th-color: var(--qc-white);
+}
+
+.qc-price .qc-table--purple {
+  --qc-th-bg: var(--qc-purple);
+  --qc-th-color: var(--qc-white);
+}
+
+.qc-price .qc-table--red {
+  --qc-th-bg: var(--qc-red);
+  --qc-th-color: var(--qc-white);
+}
+
+.qc-price .qc-table--orange {
+  --qc-th-bg: var(--qc-orange);
+  --qc-th-color: var(--qc-text);
+  --qc-th-weight: 700;
+}
+
+/* Фиолетовая, красная, оранжевая: в макете шапка внутри рамки (рамка 2px видна
+   сбоку и сверху, замер по ref @2x), радиус заливки ~10–13 → 11px, концентрично
+   внутреннему краю рамки (13 − 2) */
+.qc-price .qc-table--purple,
+.qc-price .qc-table--red,
+.qc-price .qc-table--orange {
+  --qc-th-overlap: 0px;
+  --qc-th-radius: calc(var(--qc-radius-table) - var(--qc-border-w));
+}
+
+/* Цветные шапки ниже светлой: 63px в макете (пакеты, спецпроекты).
+   Двухъярусная оранжевая (скидки, design/ref/page-4.png): верхний ряд 50px,
+   нижний — 55px заливки + линия 2px между рядами */
+.qc-price .qc-table--red .qc-table__th,
+.qc-price .qc-table--purple .qc-table__th {
+  height: 64px;
+}
+
+.qc-price .qc-table--orange .qc-table__th {
+  height: 50px;
+}
+
+.qc-price .qc-table--orange .qc-table__head .qc-table__row + .qc-table__row > .qc-table__th {
+  height: 57px;
+}
+
+/* Строки скидок одной высоты: 53px вместе с линией (в макете 52–56) */
+.qc-price .qc-table--orange .qc-table__cell {
+  height: 53px;
+}
+
+/* Таблица опций: без шапки, ячейки по центру по вертикали.
+   Высота строк по макету (BAQ и EL одинаково): с обычным бейджем ~64px,
+   с высоким ~96px — поля 8px, у высокого бейджа ещё 8px сверху и снизу */
+.qc-price .qc-table--options .qc-table__cell {
+  vertical-align: middle;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.qc-price .qc-table--options .qc-table__body .qc-table__row:first-child > * {
+  border-top: 0;
+}
+
+/* ---------- 6. Бейдж (цена в опциях) ---------- */
+.qc-price .qc-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: min(118px, 100%); /* на узких экранах колонка уже 118px — не выходим за ячейку */
+  max-width: 100%;
+  min-height: 46px;
+  padding: 8px 16px;
+  border-radius: var(--qc-radius-badge);
+  background: var(--qc-blue-light);
+  color: var(--qc-navy);
+  font-size: var(--qc-fs-cell);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Высокий бейдж (первые три опции BAQ в макете — 62px) */
+.qc-price .qc-badge--tall {
+  min-height: 62px;
+  margin: 8px 0;
+}
+
+/* ---------- 7. Плашка («ДОПОЛНИТЕЛЬНЫЕ ОПЦИИ») ---------- */
+.qc-price .qc-bar {
+  display: flex;
+  align-items: center;
+  min-height: 66px; /* 62px заливка + рамка */
+  padding: 10px 24px 10px 83px; /* текст на 85px от края, по линии второй колонки таблицы */
+  border: var(--qc-border-w) solid var(--qc-border); /* в макете плашка в светлой рамке, как таблицы */
+  border-radius: var(--qc-radius-bar);
+  background: var(--qc-navy);
+  color: var(--qc-white);
+  font-size: var(--qc-fs-head);
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+/* ---------- 8. Примечание ---------- */
+/* Градиент в PDF идёт от (47.9% ширины, низ) к (52.1%, верх), поэтому угол
+   и резкость перехода зависят от пропорций блока. Значения посчитаны для
+   пропорций блоков макета:
+   3 пункта (293×32.8pt) → 21deg, ±13%
+   2 пункта (293×25.5pt) → 26deg, ±9.4%
+   одна строка (293×12.3pt) → 46deg, ±4% */
+.qc-price .qc-note {
+  --qc-note-angle: 21deg;
+  --qc-note-spread: 13%;
+
+  padding: 18px 24px 18px 85px;
+  background: linear-gradient(
+    var(--qc-note-angle),
+    var(--qc-note-from) calc(50% - var(--qc-note-spread)),
+    var(--qc-note-to) calc(50% + var(--qc-note-spread))
+  );
+  color: var(--qc-white);
+  font-size: var(--qc-fs-cell);
+  line-height: var(--qc-lh);
+}
+
+.qc-price .qc-note--short {
+  --qc-note-angle: 26deg;
+  --qc-note-spread: 9.4%;
+}
+
+.qc-price .qc-note--inline {
+  --qc-note-angle: 46deg;
+  --qc-note-spread: 4%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 10px 24px;
+  text-align: center;
+}
+
+.qc-price .qc-note__title {
+  margin-bottom: 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.qc-price .qc-note__list {
+  counter-reset: qc-note;
+}
+
+.qc-price .qc-note__item {
+  position: relative;
+  padding-left: 30px;
+  counter-increment: qc-note;
+}
+
+.qc-price .qc-note__item + .qc-note__item {
+  margin-top: 5px;
+}
+
+/* Номер в белом кружке */
+.qc-price .qc-note__item::before {
+  content: counter(qc-note);
+  position: absolute;
+  left: 0;
+  top: 0.1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--qc-white);
+  color: var(--qc-navy);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ---------- 9. Hero ---------- */
+/* Фон на 100% ширины .qc-price, контент в .qc-container.
+   Фото: в макете — вся ширина hero-bg.jpg, полоса по вертикали с 188px из 768
+   → background-position-y 59.5%.
+   Наложение: в PDF navy-слой с радиальной маской яркости
+   1 − (1 − t)^1.434 (t — доля радиуса): центр прозрачный, края плотные.
+   Эллипс 58.6% × 64.6% блока, центр 52% / 59.6%. Стопы — эта же кривая. */
+.qc-price .qc-hero {
+  background-color: var(--qc-hero-overlay);
+  background-image:
+    radial-gradient(
+      58.6% 64.6% at 52% 59.6%,
+      rgba(var(--qc-hero-overlay-rgb), 0) 0%,
+      rgba(var(--qc-hero-overlay-rgb), 0.14) 10%,
+      rgba(var(--qc-hero-overlay-rgb), 0.34) 25%,
+      rgba(var(--qc-hero-overlay-rgb), 0.52) 40%,
+      rgba(var(--qc-hero-overlay-rgb), 0.63) 50%,
+      rgba(var(--qc-hero-overlay-rgb), 0.73) 60%,
+      rgba(var(--qc-hero-overlay-rgb), 0.86) 75%,
+      rgba(var(--qc-hero-overlay-rgb), 0.96) 90%,
+      rgba(var(--qc-hero-overlay-rgb), 1) 100%
+    ),
+    url("../assets/img/hero-bg.jpg");
+  background-position: center, center 59.5%;
+  background-size: 100% 100%, cover;
+  background-repeat: no-repeat;
+  color: var(--qc-white);
+}
+
+.qc-price .qc-hero__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: 408px;
+  /* Отступы подобраны по базовым линиям макета: верх заглавных «РЕКЛАМА» на 68px,
+     верх кнопок на 313px. Текст на 44px правее линии контента. */
+  padding: 51px 0 48px 44px;
+}
+
+/* Однострочные заголовки — line-height 1, чтобы попасть в базовые линии макета */
+.qc-price .qc-hero__title {
+  /* компенсация левого отступа глифа «Р» у Mulish, чтобы край совпал с текстом ниже */
+  margin-left: -0.09em;
+  /* 100px → высота заглавных Mulish 72px, как в макете; трекинг снимает лишнюю ширину */
+  font-size: 100px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em; /* ширина 474px, как в макете (−0.01em даёт 480px) */
+  text-transform: uppercase;
+}
+
+.qc-price .qc-hero__subtitle {
+  margin-top: 4px;
+  font-size: 42px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.qc-price .qc-hero__lead {
+  margin-top: 23px;
+  font-size: 25px;
+  line-height: 1.08; /* только в hero; в таблицах остаётся 1.2 */
+}
+
+.qc-price .qc-hero__actions {
+  --qc-btn-h: 47px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 26px;
+  margin-top: 39px;
+}
+
+/* ---------- 10. Навигация по разделам ---------- */
+/* Сетка 4 колонки: BAQ | EL | Tarihy+Әдебиет (2) / Спецпроекты (2) | Пакеты (2) */
+.qc-price .qc-nav {
+  padding-top: 51px;
+}
+
+.qc-price .qc-nav__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px 16px;
+}
+
+.qc-price .qc-nav__item--wide {
+  grid-column: span 2;
+}
+
+.qc-price .qc-nav-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  min-height: 151px;
+  padding: 14px 16px; /* 2 + 14 + 72 + 12 + 35 + 14 + 2 = 151 */
+  border: 2px solid var(--qc-border);
+  border-radius: var(--qc-radius-card);
+  background: var(--qc-white);
+  color: var(--qc-text);
+  text-decoration: none;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+/* Наведение и фокус — только рамка; фон — у открытой карточки (--active), чтобы
+   наведённую и открытую можно было различить (решение 2026-10-13) */
+.qc-price .qc-nav-card:hover,
+.qc-price .qc-nav-card:focus-visible {
+  border-color: var(--qc-blue);
+}
+
+.qc-price .qc-nav-card:focus-visible {
+  outline: 2px solid var(--qc-blue);
+  outline-offset: 2px;
+}
+
+/* Зона логотипов: центр логотипов на 52px от верха карточки, как в макете */
+.qc-price .qc-nav-card__logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 85px;
+  height: 72px;
+}
+
+.qc-price .qc-nav-card__logo {
+  flex: none;
+  height: auto;
+}
+
+.qc-price .qc-nav-card__logo--baq { width: 159px; }
+.qc-price .qc-nav-card__logo--el { width: 96px; }
+.qc-price .qc-nav-card__logo--tarihy { width: 163px; }
+.qc-price .qc-nav-card__logo--adebiet { width: 175px; }
+
+.qc-price .qc-nav-card__arrow {
+  flex: none;
+  width: 35px;
+  height: 35px;
+  margin-top: 12px;
+  transition: transform 0.3s;
+}
+
+/* Карточка-переключатель панели (data-qc-toggle, js/qc-price.js), панель открыта:
+   светлый фон (цвет светлой шапки таблиц), рамка --qc-blue, стрелка повёрнута вниз.
+   Наведение — только рамка. Вид уточнить у дизайнера (TODO.md). Класс ставит JS
+   вместе с aria-expanded="true". */
+.qc-price .qc-nav-card--active {
+  border-color: var(--qc-blue);
+  background: var(--qc-blue-light);
+}
+
+.qc-price .qc-nav-card--active .qc-nav-card__arrow {
+  transform: rotate(90deg);
+}
+
+/* Текстовая карточка: подпись по центру, тёмная стрелка в 70px от правого края */
+.qc-price .qc-nav-card--text {
+  flex-direction: row;
+  justify-content: center;
+  min-height: 86px;
+  padding: 10px 121px;
+}
+
+.qc-price .qc-nav-card__title {
+  font-size: 22px;
+  font-weight: 400;
+  line-height: var(--qc-lh);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.qc-price .qc-nav-card--text .qc-nav-card__arrow {
+  position: absolute;
+  top: 50%;
+  right: 70px;
+  margin-top: 0;
+  transform: translateY(-50%);
+}
+
+/* текстовая карточка-переключатель (спецпроекты, пакеты): стрелка сохраняет translateY */
+.qc-price .qc-nav-card--text.qc-nav-card--active .qc-nav-card__arrow {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+/* ---------- 11. Секция и её шапка ---------- */
+.qc-price .qc-section {
+  padding-top: var(--qc-section-gap);
+}
+
+/* Лого — заголовок — кнопка справа. Отступы по макету: лого на 25px от линии
+   контента, заголовок на 215px. */
+.qc-price .qc-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 0;
+  min-height: var(--qc-btn-h);
+  margin-bottom: 21px;
+}
+
+.qc-price .qc-section-head__logo {
+  flex: none;
+  width: 97px;
+  margin-left: 25px;
+  margin-right: 93px;
+}
+
+.qc-price .qc-section-head__title {
+  flex: 1 1 auto;
+  color: var(--qc-navy);
+  font-size: var(--qc-fs-head);
+  font-weight: 400;
+  line-height: var(--qc-lh);
+}
+
+/* Шапка без лого (E-History): заголовок на 72px от края, как подпись ноутбука */
+.qc-price .qc-section-head__title:first-child {
+  padding-left: 72px;
+}
+
+.qc-price .qc-section-head__action {
+  flex: none;
+  margin-left: auto;
+}
+
+/* Вертикальный ритм блоков внутри секции (по макету) */
+.qc-price .qc-table-wrap + .qc-bar {
+  margin-top: 10px;
+}
+
+.qc-price .qc-bar + .qc-table-wrap {
+  margin-top: 10px;
+}
+
+.qc-price .qc-table-wrap + .qc-note {
+  margin-top: 18px;
+}
+
+/* ---------- 12. Список цен с иконками соцсетей ---------- */
+.qc-price .qc-price-list {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.qc-price .qc-price-list__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.qc-price .qc-price-list__icon {
+  flex: none;
+  width: 18px; /* замер: 18px в BAQ и EL */
+  height: 18px;
+}
+
+/* ---------- 13. Ноутбук с баннерными местами + подпись ---------- */
+/* Ширина и отступ подписи — переменные: значения по умолчанию для Baq
+   (PNG с полями сверху 41, снизу 29 из 887px; видимая часть 916px → всё
+   изображение 1144px). Для El заданы на figure инлайн-стилем.
+   --qc-showcase-w — число без единиц: max-width сужается в той же пропорции
+   к Baq, чтобы на узких экранах ноутбуки оставались одного размера.
+   --qc-showcase-top — прозрачное поле PNG сверху в px исходника шириной 1774
+   (Baq 41, El 75). Отрицательный margin-top ровно на это поле, чтобы видимый зазор
+   до ноутбука был --qc-section-gap (решение 2026-10-08, исключение из правила
+   «без отрицательных margin»). Ширина картинки = min(W px, W/1144 × 100%), а
+   margin-top в % считается от ширины контейнера — поэтому верно на любой ширине. */
+.qc-price .qc-showcase {
+  margin: 0;
+  margin-top: calc(-1 * var(--qc-showcase-top, 41) / 1774 *
+    min(var(--qc-showcase-w, 1144) * 1px, var(--qc-showcase-w, 1144) / 1144 * 100%));
+}
+
+.qc-price .qc-showcase__img {
+  width: calc(var(--qc-showcase-w, 1144) * 1px);
+  max-width: calc(var(--qc-showcase-w, 1144) / 1144 * 100%);
+  height: auto;
+  margin: 0 auto;
+}
+
+/* Подпись сразу под нижним прозрачным полем, на 72px от края таблицы */
+.qc-price .qc-showcase__caption {
+  margin-top: var(--qc-showcase-gap, 0px);
+  padding-left: 72px;
+  color: var(--qc-navy);
+  font-size: var(--qc-fs-head);
+  font-weight: 400;
+  line-height: var(--qc-lh);
+}
+
+.qc-price .qc-showcase + .qc-table-wrap {
+  margin-top: 31px;
+}
+
+/* ---------- 14. Таблица баннеров ---------- */
+/* Строки одной высоты: 56px вместе с верхней линией (в макете 44–69px,
+   в сумме 6 × 56); у El — 68px через --qc-banner-row-h */
+.qc-price .qc-table--banners .qc-table__cell {
+  height: var(--qc-banner-row-h, 56px);
+  font-size: var(--qc-fs-head); /* в макете текст баннерных таблиц крупнее, чем в услугах: высота заглавных 17px против 15 */
+  padding-top: 6px;
+  padding-bottom: 6px;
+  vertical-align: middle;
+}
+
+/* Колонка размеров («290*1080 px» — самый длинный): текст в одну строку, а
+   колонка при table-layout: fixed не раздвигается. Правое поле почти убрано
+   (текст прижат влево, на desktop не видно), левое сужается на брейкпоинтах —
+   так размер влезает вплоть до min-width таблицы 720px. */
+.qc-price .qc-table--banners .qc-table__cell--nowrap {
+  padding-right: 4px;
+}
+
+/* «Наименование услуги» в шапке: в макете центр текста на 47px левее
+   центра колонки (так же в баннерах El) */
+.qc-price .qc-table__th--shift {
+  padding-right: calc(var(--qc-cell-px) + 94px);
+}
+
+/* ---------- 15. Брейкпоинты ---------- */
+@media (max-width: 1270px) {
+  .qc-price {
+    --qc-cell-px: 18px;
+  }
+
+  /* Подпись 22px должна влезать в одну строку вплоть до 993px:
+     стрелку прижимаем к краю, поля сужаем (24 + 35 + 13) */
+  .qc-price .qc-nav-card--text {
+    padding: 10px 72px;
+  }
+
+  .qc-price .qc-nav-card--text .qc-nav-card__arrow {
+    right: 24px;
+  }
+
+  .qc-price .qc-table--banners .qc-table__cell--nowrap {
+    padding-left: 30px;
+  }
+}
+
+@media (max-width: 992px) {
+  .qc-price {
+    --qc-fs-cell: 16px;
+    --qc-fs-head: 18px;
+  }
+
+  .qc-price .qc-table--banners .qc-table__cell--nowrap {
+    padding-left: 6px;
+  }
+
+  /* Отступ 42px на узких колонках выталкивал длинные слова за линию (769–992px) */
+  .qc-price .qc-table__cell--indent {
+    padding-left: var(--qc-cell-px);
+  }
+
+  /* Бейдж ужимается до ширины колонки — поля, чтобы «150 000» влезал (замер: ≥3px запаса) */
+  .qc-price .qc-badge {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .qc-price .qc-bar,
+  .qc-price .qc-note,
+  .qc-price .qc-showcase__caption,
+  .qc-price .qc-section-head__title:first-child {
+    padding-left: 40px;
+  }
+
+  .qc-price .qc-note--inline {
+    padding-left: 24px;
+  }
+
+  .qc-price .qc-hero__inner {
+    min-height: 360px;
+    padding-left: 20px;
+  }
+
+  .qc-price .qc-hero__title {
+    font-size: 84px;
+  }
+
+  .qc-price .qc-hero__subtitle {
+    font-size: 34px;
+  }
+
+  .qc-price .qc-hero__lead {
+    font-size: 22px;
+  }
+
+  .qc-price .qc-nav {
+    padding-top: 40px;
+  }
+
+  /* 2 колонки: BAQ | EL, ниже широкие карточки на всю ширину */
+  .qc-price .qc-nav__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .qc-price .qc-section-head__logo {
+    margin-left: 0;
+    margin-right: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .qc-price .qc-table-wrap--narrow {
+    max-width: 100%;
+  }
+
+  .qc-price .qc-bar,
+  .qc-price .qc-note {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .qc-price .qc-showcase__caption,
+  .qc-price .qc-section-head__title:first-child {
+    padding-left: 20px;
+  }
+
+  /* на узком экране блок примечания выше — переход делаем мягче */
+  .qc-price .qc-note {
+    --qc-note-angle: 60deg;
+    --qc-note-spread: 15%;
+  }
+
+  .qc-price .qc-hero__inner {
+    min-height: 0;
+    padding: 40px 0;
+  }
+
+  .qc-price .qc-hero__title {
+    font-size: 64px;
+  }
+
+  .qc-price .qc-hero__subtitle {
+    font-size: 28px;
+  }
+
+  .qc-price .qc-hero__lead {
+    margin-top: 16px;
+    font-size: 20px;
+  }
+
+  /* принудительный перенос лида только на десктопе */
+  .qc-price .qc-hero__br {
+    display: none;
+  }
+
+  .qc-price .qc-hero__actions {
+    gap: 12px 16px;
+    margin-top: 28px;
+  }
+
+  .qc-price .qc-nav {
+    padding-top: 32px;
+  }
+
+  /* 1 колонка */
+  .qc-price .qc-nav__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .qc-price .qc-nav__item--wide {
+    grid-column: auto;
+  }
+
+  .qc-price .qc-nav-card {
+    min-height: 0;
+  }
+
+  .qc-price .qc-nav-card--text {
+    min-height: 72px;
+    padding: 10px 72px;
+  }
+
+  .qc-price .qc-nav-card--text .qc-nav-card__arrow {
+    right: 20px;
+  }
+
+  .qc-price {
+    --qc-section-gap: 32px;
+  }
+
+  .qc-price .qc-section-head__logo {
+    margin-right: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .qc-price {
+    --qc-fs-cell: 15px;
+    --qc-fs-head: 16px;
+    --qc-fs-btn: 15px;
+    --qc-cell-px: 14px;
+    --qc-cell-py: 10px;
+  }
+
+  .qc-price .qc-btn {
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* Шрифт 16px — место есть, левое поле как у остальных ячеек */
+  .qc-price .qc-table--banners .qc-table__cell--nowrap {
+    padding-left: var(--qc-cell-px);
+  }
+
+  .qc-price .qc-hero__inner {
+    padding: 32px 0;
+  }
+
+  .qc-price .qc-hero__title {
+    font-size: 46px;
+  }
+
+  .qc-price .qc-hero__subtitle {
+    font-size: 24px;
+  }
+
+  .qc-price .qc-hero__lead {
+    font-size: 17px;
+  }
+
+  .qc-price .qc-nav-card__logos {
+    gap: 24px;
+    height: 64px;
+  }
+
+  .qc-price .qc-nav-card__logo--baq { width: 130px; }
+  .qc-price .qc-nav-card__logo--el { width: 80px; }
+  .qc-price .qc-nav-card__logo--tarihy { width: 120px; }
+  .qc-price .qc-nav-card__logo--adebiet { width: 130px; }
+
+  .qc-price .qc-nav-card__arrow {
+    width: 30px;
+    height: 30px;
+  }
+
+  .qc-price .qc-nav-card--text {
+    padding: 10px 56px;
+  }
+
+  .qc-price .qc-nav-card--text .qc-nav-card__arrow {
+    right: 16px;
+  }
+
+  /* кнопка «Скачать прайс-лист» уходит на отдельную строку */
+  .qc-price .qc-section-head__title {
+    flex-basis: 0;
+  }
+
+  .qc-price .qc-section-head__action {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+}
+
+/* ---------- 16. Аккордеон: панели BAQ, EL, E-History, спецпроекты, пакеты + скидки ---------- */
+/* <div class="qc-panel" data-qc-panel="…"><div class="qc-panel__inner">секции</div></div>.
+   Скрываются, только если отработал js/qc-price.js: он ставит .qc-price--js на корень
+   (без JS всё видно, как раньше). Высота анимируется через grid-template-rows 0fr → 1fr:
+   у внутреннего блока min-height: 0 и overflow: hidden, поэтому закрытая панель —
+   ровно 0px и не добавляет зазоров (--qc-section-gap — padding-top секций внутри).
+   visibility: hidden — после окончания закрытия (задержка = длительность); вместе с
+   атрибутом inert, который ставит JS, закрытое содержимое не получает фокус и не
+   читается скринридером. Открытие — класс .qc-panel--open. */
+.qc-price.qc-price--js .qc-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.qc-price.qc-price--js .qc-panel--open {
+  grid-template-rows: 1fr;
+}
+
+.qc-price.qc-price--js .qc-panel__inner {
+  min-height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  transition: visibility 0s linear 0.3s;
+}
+
+.qc-price.qc-price--js .qc-panel--open > .qc-panel__inner {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qc-price.qc-price--js .qc-panel,
+  .qc-price.qc-price--js .qc-panel__inner,
+  .qc-price .qc-nav-card__arrow {
+    transition: none;
+  }
+}
+
+/* Печать: все панели раскрыты, независимо от состояния аккордеона; без переходов —
+   иначе на смене медиа запускается анимация 0fr → 1fr и задержка visibility */
+@media print {
+  .qc-price.qc-price--js .qc-panel {
+    grid-template-rows: 1fr;
+    transition: none;
+  }
+
+  .qc-price.qc-price--js .qc-panel__inner {
+    overflow: visible;
+    visibility: visible;
+    transition: none;
+  }
+}
